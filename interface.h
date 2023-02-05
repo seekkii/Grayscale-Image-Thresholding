@@ -30,51 +30,38 @@ class segment: public QWidget{
     QPoint getImgPos(){
         return pos;
     }
-    void showImg(){
-        w->resize(img.width(),img.height());
-        QPalette palette;
-        palette.setBrush(QPalette::Window, img);
-        w->setPalette(palette);
-        w->move(0,0);
-        w->show();
-        this->hide();
-    }
-
-
-
  public slots:
     void OtsuThresh(){
         Otsu otsu_method(img);
         img = otsu_method.imageSegment();
-        showImg();
+        this->hide();
     };
 
     void AdaptiveMeanThresh(){
         AdaptiveThresh adaptTh(img);
         img = adaptTh.imageSegment(5,3,"mean");
-        showImg();
+        this->hide();
     };
 
     void AdaptiveMedianThresh(){
         AdaptiveThresh adaptTh(img);
         img = adaptTh.imageSegment(5,3,"median");
-        showImg();
+        this->hide();
     };
 
-
-
-
+    void AdaptiveMidpointThresh(){
+        AdaptiveThresh adaptTh(img);
+        img = adaptTh.imageSegment(5,3,"midpoint");
+        this->hide();
+    };
    private:
-       QWidget *w;
        QWidget *parent;
-
-
        QPushButton *median_btn;
        QPushButton *otsu_btn;
        QPushButton *mean_btn;
+       QPushButton *mid_btn;
        QImage img;
        QPoint pos;
-       QPoint starting_point;
        QString fileName;
 
 
@@ -91,18 +78,7 @@ class program : public QWidget
     QImage image;
     QPoint mousePosInitial;// qpoint that contains mouse positions
     QPoint mousePosNext;// qpoint that contains mouse positions
-    explicit program(){
-        seg = new segment(this);
-        resize(300,300);
-        showInstruct = false;
-
-        button = new QPushButton("&load image ",this);
-        ctrlT = new QShortcut(this);
-        ctrlT->setKey(Qt::CTRL | Qt::Key_T); // Set the key code
-
-        connect(button, SIGNAL(clicked()), this, SLOT(load()));
-        connect(ctrlT, SIGNAL(activated()), this, SLOT(openSegmentOption()));
-    };// constructor
+    explicit program();
 
     void paintEvent(QPaintEvent *) override;
 
@@ -112,15 +88,9 @@ class program : public QWidget
 
     void mouseReleaseEvent(QMouseEvent *event)override;
 
-
-
-
    public slots:
        void load();
        void openSegmentOption();
-
-
-
    private:
        int selected_height;
        int selected_width;

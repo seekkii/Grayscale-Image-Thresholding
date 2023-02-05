@@ -7,17 +7,17 @@ segment::segment(QWidget *parent){
     otsu_btn = new QPushButton("&Otsu Segmentation ",this);
     mean_btn = new QPushButton("&Mean Adaptive Segmentation ",this);
     median_btn = new QPushButton("&Median Adaptive Segmentation ",this);
+    mid_btn = new QPushButton("&Midpoint Adaptive Segmentation ",this);
     connect(otsu_btn, SIGNAL(clicked()), this, SLOT(OtsuThresh()));
     connect(mean_btn, SIGNAL(clicked()), this, SLOT(AdaptiveMeanThresh()));
     connect(median_btn, SIGNAL(clicked()), this, SLOT(AdaptiveMedianThresh()));
+    connect(mid_btn, SIGNAL(clicked()), this, SLOT(AdaptiveMidpointThresh()));
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(otsu_btn);
     layout->addWidget(mean_btn);
     layout->addWidget(median_btn);
-
-    w = new QWidget(parent);
-
+    layout->addWidget(mid_btn);
 };// constructor
 
 //~~~~~~~~~main window~~~~~~~~~~
@@ -38,10 +38,7 @@ program::program(){
 void program::load()
 {
     fileName = QFileDialog::getOpenFileName();
-    if (fileName == ""){
-        return;
-    }
-    if (!image.load(fileName)){
+    if (fileName == ""||!image.load(fileName)){
         QTextStream(stdout) << "Cannot load image: " << fileName << Qt::endl;
         return;
     }
@@ -110,7 +107,7 @@ void program::mouseReleaseEvent(QMouseEvent *event)
         showInstruct = true;
         update();
     }
-}//store mouse position on clicked
+}
 
 void program::mouseMoveEvent(QMouseEvent *event)
 {
@@ -126,7 +123,7 @@ void program::mouseMoveEvent(QMouseEvent *event)
         selected_width = (mousePosNext.y()-mousePosInitial.y());
         update();
     }
-}//store cursor's position each time mouse is clicked
+}
 
 void program::paintEvent(QPaintEvent *)
 {
@@ -136,10 +133,9 @@ void program::paintEvent(QPaintEvent *)
         pen = QPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
     }
     else{
-        auto back = QRect{seg->getImgPos(), seg->getImage().size()};//rectangle that has center of your char to print pixmap from
+        auto back = QRect{seg->getImgPos(), seg->getImage().size()};
         painter.drawImage(back,seg->getImage());
         pen =  QPen(Qt::red, 1, Qt::DotLine, Qt::RoundCap, Qt::RoundJoin);
-
     }
     painter.setPen(pen);
     QRect rect = QRect(mousePosInitial, QSize(selected_height, selected_width));

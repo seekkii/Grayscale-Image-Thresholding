@@ -1,6 +1,5 @@
 #include "Thresholding.h"
 #include "qdebug.h"
-#include "qlabel.h"
 
 //~~~~~~~~~~Otsu Method~~~~~~~~~~~~~~
 Otsu::Otsu(QImage img){
@@ -214,7 +213,14 @@ int AdaptiveThresh::mean(std::vector<int> &intens)
 {
     int sum = std::accumulate(intens.begin(), intens.end(), 0);
     return sum/intens.size();
-}//median
+}//mean
+
+int  AdaptiveThresh::midpoint(std::vector<int> &intens)
+{
+    sort(intens.begin(), intens.end());
+    return (intens[0] + intens[intens.size()-1])/2;
+}//midpoint
+
 
 QImage AdaptiveThresh::medianFlt(int kern_dim)
 {
@@ -245,6 +251,41 @@ QImage AdaptiveThresh::medianFlt(int kern_dim)
                 }
             }
             ptr_out_row[indx_col] = median(intens);
+        }
+    }
+
+    return out_image;
+}//medianFlt
+
+QImage AdaptiveThresh::midpointFlt(int kern_dim)
+{
+    QImage out_image(image.width(), image.height(), QImage::Format_Grayscale8);
+    const int DK = kern_dim / 2;
+    for (int indx_row = 0; indx_row < image.height(); indx_row++)
+    {
+        quint8* ptr_out_row = (quint8*)(out_image.bits()
+                + indx_row * out_image.bytesPerLine());
+        for (int indx_col = 0; indx_col < image.width(); indx_col++)
+        {
+            std::vector<int> intens;
+            for (int indx_ker_row = 0; indx_ker_row < kern_dim; indx_ker_row++)
+            {
+                int x = indx_row - DK + indx_ker_row;
+                if (x >= 0 && x < image.height())
+                {
+                    quint8* ptr_in_row = (quint8*)(image.bits()
+                        + x * image.bytesPerLine());
+                    for (int indx_ker_col = 0; indx_ker_col < kern_dim; indx_ker_col++)
+                    {
+                        int y = indx_col - DK + indx_ker_col;
+                        if (y >= 0 && y < image.width())
+                        {
+                            intens.push_back(ptr_in_row[y]);
+                        }
+                    }
+                }
+            }
+            ptr_out_row[indx_col] = midpoint(intens);
         }
     }
 
@@ -296,6 +337,10 @@ QImage AdaptiveThresh::imageSegment(int kern_dim, int C, QString stat)
     {
         out = meanFlt(kern_dim);
     }
+    else if (stat == "midpoint")
+    {
+        out = midpointFlt(kern_dim);
+    }
 
     for (int indx_row = 0; indx_row < image.height(); indx_row++)
     {
@@ -310,5 +355,5 @@ QImage AdaptiveThresh::imageSegment(int kern_dim, int C, QString stat)
     }
 
     return image;
-}//medianFlt
+}
 

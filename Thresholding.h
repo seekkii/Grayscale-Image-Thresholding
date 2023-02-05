@@ -35,8 +35,10 @@ class AdaptiveThresh
         AdaptiveThresh(QImage img);
         int median(std::vector<int> &intens);
         int mean(std::vector<int> &intens);
+        int midpoint(std::vector<int> &intens);
         QImage medianFlt(int kern_dim);
         QImage meanFlt(int kern_dim);
+        QImage midpointFlt(int kern_dim);
 
         QImage imageSegment(int kern_dim, int C, QString stat);
 
